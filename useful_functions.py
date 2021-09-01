@@ -10,6 +10,7 @@ print("""
  ## univariate analysis
 - plot_cont_kde
 - plot_cat_countplot
+- barPerc
 # Clustering functions
 - radar_ploting_clustering
 """)
@@ -114,12 +115,15 @@ def dfs_insight(df_dict):
         display(df_dict[name].head(3))
         print('-'*70)
 
-def plot_cont_kde(data_df, var_list, w=30,h=6):
+def plot_cont_kde(data_df, var_list, hue=None, w=30,h=6):
     """# plot kde plot with median and Std values for one or more designated variables
     
     args: 
     - df 
     - [variables] to plot (list with just the names between quotes, without the df)
+    WIP: 
+    - hue: (str) key in df plugged into sns.kdeplot: Semantic variable that is mapped to determine the color of plot elements. 
+    ->  legend does not show as in classic sns.kdeplot 
     
     kwargs:
     - width
@@ -164,7 +168,7 @@ def plot_cont_kde(data_df, var_list, w=30,h=6):
         axes[i, 0].tick_params(axis='both', labelsize=15)
         
         # kde plot
-        sns.kdeplot(x=data_df[var], ax=axes[i, 1], color='#0D8295')
+        sns.kdeplot(data=data_df, x=var, ax=axes[i, 1], color='#0D8295', hue=hue)
         axes[i, 1].set_ylabel(None)
         
         # ploting indicators over the kde plot
@@ -208,6 +212,38 @@ def plot_cat_countplot(data, var_list, index_col, w=30, h=6):
         ax.set_ylabel(ind, fontsize=30)
         ax.set_xlabel('count {}'.format(index_col), fontsize=30)
         # ax.tick_params(rotation=45)
+        
+def barPerc(df,xVar,ax):
+    '''
+    barPerc(): Add percentage for hues to bar plots
+    args:
+        df: pandas dataframe
+        xVar: (string) X variable 
+        ax: Axes object (for Seaborn Countplot/Bar plot or
+                         pandas bar plot, hue must be specified
+                         a parameter of the plot)
+    '''
+    # 1. how many X categories
+    ##   check for NaN and remove
+    numX=len([x for x in df[xVar].unique() if x==x])
+
+    # 2. The bars are created in hue order, organize them
+    bars = ax.patches
+    ## 2a. For each X variable
+    for ind in range(numX):
+        ## 2b. Get every hue bar
+        ##     ex. 8 X categories, 4 hues =>
+        ##    [0, 8, 16, 24] are hue bars for 1st X category
+        hueBars=bars[ind:][::numX]
+        ## 2c. Get the total height (for percentages)
+        total = sum([x.get_height() for x in hueBars])
+
+        # 3. Print the percentage on the bars
+        for bar in hueBars:
+            ax.text(bar.get_x() + bar.get_width()/2.,
+                    bar.get_height(),
+                    f'{bar.get_height()/total:.0%}',
+                    ha="center",va="bottom")
         
 # Clustering functions
 
