@@ -1,8 +1,9 @@
-"""Useful fonctions and params"""
+"""Useful fonctions and params
 
-print("""
 # plot params
 - set_style_pers
+
+# Requirement.txt file
 
 # EDA functions
  ## multiple dfs exploration
@@ -11,9 +12,14 @@ print("""
 - plot_cont_kde
 - plot_cat_countplot
 - barPerc
+
 # Clustering functions
 - radar_ploting_clustering
-""")
+"""
+
+import matplotlib
+import matplotlib.pyplot as plt
+import seaborn as sns
 
 # plot params
 
@@ -47,6 +53,22 @@ class color:
    BOLD = '\033[1m'
    UNDERLINE = '\033[4m'
    END = '\033[0m'
+
+# requirement.txt file
+def reqs_env(out_path):
+    """Generate a requirement.txt file into the specified path. Requirement file contains packages and dependancies of the 
+    activated environment
+    /!\ it may be necessary to remove manually white spaces in the file before using
+    source: https://github.com/pypa/pip/issues/5243#issuecomment-381513000
+    """
+    import pkg_resources
+    df = pd.DataFrame([str(pck).split() for pck in pkg_resources.working_set])
+    df["sep"] = "=="
+    df = df.loc[:, [0, "sep", 1]]
+    with open(out_path, 'w') as f:
+        dfAsString = df.to_string(header=False, index=False)
+        f.write(dfAsString)
+    # /!\ white space are present in the file !
 
 # EDA functions
 
@@ -223,6 +245,7 @@ def barPerc(df,xVar,ax):
                          pandas bar plot, hue must be specified
                          a parameter of the plot)
     '''
+    set_style_pers()
     # 1. how many X categories
     ##   check for NaN and remove
     numX=len([x for x in df[xVar].unique() if x==x])
